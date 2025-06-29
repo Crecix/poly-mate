@@ -16,7 +16,7 @@ Focus on their interests: ${interests}. Include podcasts, articles, videos, book
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -25,6 +25,23 @@ Focus on their interests: ${interests}. Include podcasts, articles, videos, book
         temperature: 0.7
       })
     });
+
+    const data = await response.json();
+
+    if (!data.choices || !data.choices[0]) {
+      console.error("OpenAI response missing choices:", data);
+      return res.status(500).json({ error: "OpenAI returned no choices." });
+    }
+
+    const result = data.choices[0].message.content;
+    return res.status(200).json({ result });
+
+  } catch (error) {
+    console.error("OpenAI API error:", error);
+    return res.status(500).json({ error: "Server error." });
+  }
+}
+
 
     const data = await response.json();
 
