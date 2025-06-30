@@ -1,4 +1,4 @@
-// pages/api/recommend.ts
+﻿// pages/api/recommend.ts
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -16,11 +16,11 @@ Focus on their interests: ${interests}. Include podcasts, articles, videos, book
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-3.5-turbo", // switch from gpt-4 for reliability
         messages: [{ role: "user", content: prompt }],
         temperature: 0.7
       })
@@ -28,8 +28,10 @@ Focus on their interests: ${interests}. Include podcasts, articles, videos, book
 
     const data = await response.json();
 
+    console.log("🔍 OpenAI raw response:", JSON.stringify(data, null, 2));
+
     if (!data.choices || !data.choices[0]) {
-      console.error("OpenAI response missing choices:", data);
+      console.error("⚠️ OpenAI response missing choices:", data);
       return res.status(500).json({ error: "OpenAI returned no choices." });
     }
 
@@ -37,23 +39,7 @@ Focus on their interests: ${interests}. Include podcasts, articles, videos, book
     return res.status(200).json({ result });
 
   } catch (error) {
-    console.error("OpenAI API error:", error);
-    return res.status(500).json({ error: "Server error." });
-  }
-}
-
-
-    const data = await response.json();
-
-    if (!data.choices || !data.choices[0]) {
-      return res.status(500).json({ error: "OpenAI failed to respond." });
-    }
-
-    const result = data.choices[0].message.content;
-
-    return res.status(200).json({ result });
-  } catch (error) {
-    console.error("Error fetching from OpenAI:", error);
-    return res.status(500).json({ error: "Something went wrong." });
+    console.error("🔥 OpenAI API error:", error);
+    return res.status(500).json({ error: "Something went wrong in the server." });
   }
 }
